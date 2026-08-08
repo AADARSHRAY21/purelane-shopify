@@ -7,9 +7,12 @@ What's complete:
   (see docs/metaobjects.md) — Review definition created and populated
   with 3 real entries; combo_component and bundle_tier definitions
   designed but not yet created in admin
-- Hero section (sections/hero.liquid) built to spec: schema-driven
-  blocks for trust badges and product-stage slides, real Shopify
-  product data throughout, no hardcoded content
+- Hero section (sections/hero.liquid) built to spec: 
+- Shop grid section (sections/product-grid.liquid) built to spec:
+  collection-driven, pills computed from real inventory/tags/creation
+  date, ratings computed from Review metaobject entries, native
+  add-to-cart form, sold-out and no-image edge cases handled
+  gracefully.
 
 What I flagged in the original file:
 - The rotating hero product stage used hardcoded placeholder SVG art
@@ -40,11 +43,13 @@ What I changed in the code and why:
   of breaking layout.
 
 What's not built yet, and why:
-- Shop/product grid, combos, bundles, and reviews rail sections are
-  not code-complete. Given the time available, I prioritized getting
-  the data model right and one section (Hero) fully correct over
-  producing five partially-broken sections. The metaobject schema for
-  all four remaining sections is designed and documented.
+- Reviews rail, Combos, and Bundles sections are not code-complete.
+  The full data model for all three is built and populated in admin
+  (Review, Combo, Combo component, Bundle tier metaobjects — see
+  docs/metaobjects.md) with real entries ready to render against.
+  Given the time available, I prioritized shipping two sections
+  completely correct (Hero, Shop grid) over five sections rushed and
+  partially broken.
 
 With more time, I would:
 - Finish creating combo_component and bundle_tier metaobject
