@@ -1,5 +1,4 @@
-/* Extracted verbatim from purelane-homepage.html <style> blocks (lines 13-632, 636-822).
-   Drop this file into assets/purelane.css in your theme repo. */
+/* Extracted verbatim from purelane-homepage.html <style> blocks (lines 13-632, 635-822). */
 
 :root{
   --ink:#17102b;
@@ -621,6 +620,7 @@ footer{position:relative;z-index:2;margin-top:var(--sec-y);padding:44px 0 30px;b
   .wl-a,.wl-b,.wl-c,.wl-s,.bub span{animation:none}
   html{scroll-behavior:auto}
 }
+/* ============================================================
    VERSION 2 - BRAND COLOURS (light)
    Same structure and geometry as V1. Palette returned to the
    Purelane guidelines: pale mint ground, #4b3a8f teal ink,
@@ -807,3 +807,4 @@ footer{background:linear-gradient(180deg,rgba(255,255,255,.62),rgba(214,241,221,
 .rbar .tr i{background:#b8701c}
 .stickybuy{background:rgba(255,255,255,.88);border-top:1px solid rgba(75,58,143,.14)}
 .stickybuy .sp span s{color:rgba(36,26,61,.42)}
+
