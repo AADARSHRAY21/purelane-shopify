@@ -1,0 +1,24 @@
+<article class="glass tier{% if tier.featured.value %} best{% endif %} rv">
+  <span class="tag">{{ tier.tag.value }}</span>
+  <div class="tierpix{% if tier.quantity.value == 5 %} five{% endif %}" aria-hidden="true">
+    {%- for product in tier.preview_products.value -%}
+      {%- if product.featured_image -%}
+        <span class="pimg pimg--photo" style="background-image:url({{ product.featured_image | image_url: width: 150 }})" role="img" aria-label="{{ product.title | escape }}"></span>
+      {%- else -%}
+        <span class="pimg pimg--placeholder">{{ product.title | placeholder_svg_tag: 'placeholder-svg' }}</span>
+      {%- endif -%}
+    {%- endfor -%}
+  </div>
+  <div class="qty">{{ tier.quantity.value }}<small>Products</small></div>
+  <div class="price">{{ tier.price.value | money }} <s>{{ tier.compare_at_price.value | money }}</s></div>
+  <p class="body-s" style="font-size:12px">{{ tier.per_product_note.value }}</p>
+  <ul>
+    {%- for feature in tier.features.value -%}
+      <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>{{ feature }}</li>
+    {%- endfor -%}
+  </ul>
+  <a class="btn {% if tier.featured.value %}btn-primary{% else %}btn-ghost{% endif %}" href="{{ tier.cta_link.value | default: '#shop' }}">
+    {{ tier.cta_label.value | default: 'Build this box' }}
+    {%- if tier.featured.value -%}<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-5-6 6 6-6 6"/></svg>{%- endif -%}
+  </a>
+</article>

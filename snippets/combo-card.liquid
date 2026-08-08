@@ -1,0 +1,43 @@
+{%- liquid
+  assign price = combo.price.value
+  assign compare_at = combo.compare_at_price.value
+  assign savings = 0
+  if compare_at > price
+    assign savings = compare_at | minus: price
+  endif
+  assign components = combo.components.value
+-%}
+<article class="glass combo{% if combo.badge.value != blank %} hero-combo{% endif %}">
+  <div class="tray">
+    {%- if savings > 0 -%}<span class="save">You save {{ savings | money }}</span>{%- endif -%}
+    {%- if combo.badge.value != blank -%}<span class="flag">{{ combo.badge.value }}</span>{%- endif -%}
+    <div class="stack">
+      {%- for comp in components -%}
+        {%- assign product = comp.product.value -%}
+        <span class="it">
+          {%- if product.featured_image -%}
+            <span class="pimg pimg--photo" style="background-image:url({{ product.featured_image | image_url: width: 200 }})" role="img" aria-label="{{ product.title | escape }}"></span>
+          {%- else -%}
+            <span class="pimg pimg--placeholder">{{ product.title | placeholder_svg_tag: 'placeholder-svg' }}</span>
+          {%- endif -%}
+          <span>{{ comp.caption.value }}</span>
+        </span>
+        {%- unless forloop.last -%}<span class="plus" aria-hidden="true">+</span>{%- endunless -%}
+      {%- endfor -%}
+    </div>
+  </div>
+  <div class="body">
+    <h3>{{ combo.title }}</h3>
+    <div class="cnt">{{ components.size }} products</div>
+    <p class="inc">Includes: {%- for comp in components -%}{{ comp.product.value.title }}{% unless forloop.last %}{% if forloop.rindex == 2 %} &amp;{% else %},{% endif %} {% endunless %}{%- endfor -%}.</p>
+    <div class="prow">
+      <strong>{{ price | money }}</strong>
+      {%- if compare_at > price -%}<s>{{ compare_at | money }}</s><em>Save {{ savings | money }}</em>{%- endif -%}
+    </div>
+    <div class="fine">Inclusive of all taxes &middot; COD available</div>
+    <a class="btn {% if combo.badge.value != blank %}btn-primary{% else %}btn-ghost{% endif %}" href="{{ combo.cta_link.value | default: '#bundles' }}">
+      {{ combo.cta_label.value | default: 'Shop bundle' }}
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h13m-5-6 6 6-6 6"/></svg>
+    </a>
+  </div>
+</article>
