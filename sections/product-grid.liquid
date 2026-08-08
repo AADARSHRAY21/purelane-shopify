@@ -1,38 +1,174 @@
-<section class="sec" id="shop" data-scene="3">
+{% comment %}
+  Purelane — Shop / product grid section (#shop equivalent).
+  Pills (Sold out / New / Best seller / Top rated) are computed from
+  real data: inventory, creation date, and merchant tags — nothing
+  hardcoded. Ratings come from the Review metaobject; a product with
+  no reviews simply shows no rating row.
+{% endcomment %}
+
+<section class="purelane-shop">
   <div class="wrap">
-    <div class="panel-head rv">
-      <span class="kicker">{{ section.settings.kicker }}</span>
-      <h2 class="d2" style="margin-top:12px">{{ section.settings.heading }}</h2>
-      <div class="rule"><i></i>
+    <div class="panel-head rv in">
+      {%- if section.settings.kicker != blank -%}
+        <span class="kicker">{{ section.settings.kicker }}</span>
+      {%- endif -%}
+      <h2 class="d2">{{ section.settings.heading }}</h2>
+      <div class="rule">
+        <i></i>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-6.5 3.5-11 8-12.5C20 15 16.5 20 12 21Z"/><path d="M12 21C12 14.5 8.5 10 4 8.5 4 15 7.5 20 12 21Z"/></svg>
-      <i></i></div>
+        <i></i>
+      </div>
     </div>
-    <div class="shelf">
-      {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
-        {%- assign s = forloop.index0 | modulo: 4 -%}
-        {%- case s -%}
-          {%- when 1 -%}{%- assign rc = 'rv-d1' -%}
-          {%- when 2 -%}{%- assign rc = 'rv-d2' -%}
-          {%- when 3 -%}{%- assign rc = 'rv-d3' -%}
-          {%- else -%}{%- assign rc = '' -%}
-        {%- endcase -%}
-        {%- render 'product-card', product: product, reveal_class: rc -%}
-      {%- else -%}
-        <p>Add products to this collection to fill this section.</p>
-      {%- endfor -%}
-    </div>
+
+    {%- assign coll = section.settings.collection -%}
+    {%- if coll != blank -%}
+      <div class="shelf">
+        {%- for product in coll.products limit: section.settings.product_limit -%}
+          {%- assign product_reviews = shop.metaobjects.review.values | where_exp: "r", "r.product.value == product" -%}
+          {%- assign is_new = false -%}
+          {%- assign days_old = "now" | date: "%s" | minus: product.created_at | date: "%s" -%}
+          {%- assign created_ts = product.created_at | date: "%s" -%}
+          {%- assign now_ts = "now" | date: "%s" -%}
+          {%- assign age_days = now_ts | minus: created_ts | divided_by: 86400 -%}
+          {%- if age_days <= 30 -%}{%- assign is_new = true -%}{%- endif -%}
+
+          <article class="glass card rv in{% unless product.available %} is-sold-out{% endunless %}">
+            <div class="shot">
+              {%- if product.available == false -%}
+                <span class="pill pill-soldout">Sold out</span>
+              {%- elsif product.tags contains 'best-seller' -%}
+                <span class="pill">Best seller</span>
+              {%- elsif product.tags contains 'top-rated' -%}
+                <span class="pill">Top rated</span>
+              {%- elsif is_new -%}
+                <span class="pill">New</span>
+              {%- endif -%}
+
+              {%- if product.featured_image -%}
+                <img src="{{ product.featured_image | image_url: width: 400 }}"
+                     alt="{{ product.featured_image.alt | default: product.title | escape }}"
+                     width="400"
+                     height="{{ 400 | divided_by: product.featured_image.aspect_ratio | round }}"
+                     loading="lazy">
+              {%- else -%}
+                {{ 'product-1' | placeholder_svg_tag: 'shot-placeholder' }}
+              {%- endif -%}
+            </div>
+
+            <h4>{{ product.title }}</h4>
+
+            {%- if product_reviews.size > 0 -%}
+              {%- assign rating_sum = 0 -%}
+              {%- for r in product_reviews -%}
+                {%- assign rating_sum = rating_sum | plus: r.rating.value -%}
+              {%- endfor -%}
+              {%- assign avg_rating = rating_sum | divided_by: product_reviews.size | round: 1 -%}
+              <div class="rate"><b>★ {{ avg_rating }}</b> · {{ product_reviews.size }} review{% if product_reviews.size != 1 %}s{% endif %}</div>
+            {%- endif -%}
+
+            <div class="pr">
+              <strong>{{ product.price | money }}</strong>
+              {%- if product.compare_at_price > product.price -%}
+                <s>{{ product.compare_at_price | money }}</s>
+                {%- assign discount = 100 | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+                {%- assign discount_pct = product.compare_at_price | minus: product.price | times: 100 | divided_by: product.compare_at_price -%}
+                <em>{{ discount_pct }}% off</em>
+              {%- endif -%}
+            </div>
+
+            {%- if product.available -%}
+              {%- form 'product', product -%}
+                <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+                <button type="submit" class="btn btn-ghost btn-sm">Add to cart</button>
+              {%- endform -%}
+            {%- else -%}
+              <button type="button" class="btn btn-ghost btn-sm" disabled>Sold out</button>
+            {%- endif -%}
+          </article>
+        {%- else -%}
+          <p class="body-s">No products found in this collection.</p>
+        {%- endfor -%}
+      </div>
+    {%- else -%}
+      <p class="body-s" style="text-align:center">Select a collection in the section settings to show products here.</p>
+    {%- endif -%}
   </div>
 </section>
+
+{% style %}
+.purelane-shop{
+  position:relative;padding:64px 0;
+  background:linear-gradient(165deg,#241a3d 0%,#1a1330 55%,#150f26 100%);
+  font-family:'Inter',system-ui,sans-serif;
+}
+.purelane-shop .wrap{max-width:1180px;margin:0 auto;padding:0 18px}
+.purelane-shop .panel-head{text-align:center;margin-bottom:26px}
+.purelane-shop .kicker{font-size:11px;font-weight:700;letter-spacing:.22em;text-transform:uppercase;color:rgba(236,230,247,.52)}
+.purelane-shop .d2{font-family:'Outfit',sans-serif;text-transform:uppercase;letter-spacing:-.018em;font-weight:800;
+  line-height:.94;color:#faf7fd;font-size:clamp(30px,4.6vw,54px);margin:12px 0}
+.purelane-shop .rule{display:flex;align-items:center;gap:13px;margin:0 auto;max-width:240px;justify-content:center}
+.purelane-shop .rule i{height:1px;flex:1;background:linear-gradient(90deg,transparent,rgba(236,230,247,.44))}
+.purelane-shop .rule svg{width:16px;height:16px;color:#f0a03c;flex:0 0 auto}
+.purelane-shop .body-s{font-size:14.5px;color:rgba(236,230,247,.74);text-align:center}
+
+.purelane-shop .glass{
+  background:linear-gradient(158deg,rgba(236,230,247,.15),rgba(75,58,143,.20) 58%,rgba(23,16,43,.28));
+  backdrop-filter:blur(24px) saturate(150%);-webkit-backdrop-filter:blur(24px) saturate(150%);
+  border:1px solid rgba(236,230,247,.22);border-radius:26px;
+  box-shadow:0 26px 74px rgba(18,12,34,.44),inset 0 1px 0 rgba(255,255,255,.24);
+}
+
+.purelane-shop .shelf{display:grid;gap:14px;grid-template-columns:repeat(2,1fr)}
+@media(min-width:860px){.purelane-shop .shelf{grid-template-columns:repeat(4,1fr)}}
+.purelane-shop .card{padding:16px;display:flex;flex-direction:column;transition:.4s cubic-bezier(.2,.7,.2,1)}
+.purelane-shop .card:hover{transform:translateY(-5px)}
+.purelane-shop .card.is-sold-out{opacity:.7}
+.purelane-shop .card .shot{height:150px;border-radius:14px;margin-bottom:14px;display:grid;place-items:center;
+  position:relative;overflow:hidden;background:linear-gradient(160deg,rgba(255,255,255,.10),rgba(236,230,247,.05))}
+.purelane-shop .card .shot img{max-height:122px;width:auto;object-fit:contain}
+.purelane-shop .card.is-sold-out .shot img{filter:grayscale(.5)}
+.purelane-shop .card .pill{position:absolute;top:9px;left:9px;font-size:8.5px;font-weight:800;letter-spacing:.13em;
+  text-transform:uppercase;padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.86);
+  border:1px solid rgba(201,118,29,.34);color:#4f7d10;z-index:2}
+.purelane-shop .card .pill-soldout{background:rgba(40,20,20,.86);border-color:rgba(255,255,255,.2);color:#faf7fd}
+.purelane-shop .card h4{font-family:'Outfit',sans-serif;font-size:13.5px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.03em;color:#faf7fd;line-height:1.2;margin-bottom:7px}
+.purelane-shop .card .rate{font-size:11.5px;color:rgba(236,230,247,.74);margin-bottom:10px;display:flex;align-items:center;gap:5px}
+.purelane-shop .card .rate b{color:#f0a03c;font-weight:700}
+.purelane-shop .card .pr{margin-top:auto;display:flex;align-items:baseline;gap:8px;margin-bottom:12px;flex-wrap:wrap}
+.purelane-shop .card .pr strong{font-family:'Outfit',sans-serif;font-size:18px;color:#faf7fd;font-weight:700}
+.purelane-shop .card .pr s{font-size:12px;color:rgba(236,230,247,.52)}
+.purelane-shop .card .pr em{font-style:normal;font-size:10px;font-weight:800;letter-spacing:.08em;color:#f0a03c}
+.purelane-shop .card form{margin:0}
+.purelane-shop .btn{display:inline-flex;align-items:center;justify-content:center;gap:10px;height:46px;padding:0 22px;
+  border-radius:999px;font-size:12.5px;font-weight:700;letter-spacing:.13em;text-transform:uppercase;
+  transition:.35s cubic-bezier(.2,.7,.2,1);width:100%}
+.purelane-shop .btn-ghost{background:rgba(236,230,247,.10);border:1px solid rgba(236,230,247,.30);
+  backdrop-filter:blur(12px);color:#faf7fd;cursor:pointer}
+.purelane-shop .btn-ghost:hover:not(:disabled){background:rgba(236,230,247,.18);transform:translateY(-2px)}
+.purelane-shop .btn-ghost:disabled{opacity:.5;cursor:not-allowed}
+.purelane-shop .btn-sm{height:38px;font-size:11px;letter-spacing:.14em}
+.purelane-shop .btn:focus-visible{outline:2px solid #faf7fd;outline-offset:3px}
+
+.purelane-shop .rv{opacity:0;transform:translateY(30px);filter:blur(7px);
+  transition:opacity .95s cubic-bezier(.2,.7,.2,1),transform .95s cubic-bezier(.2,.7,.2,1),filter .95s cubic-bezier(.2,.7,.2,1)}
+.purelane-shop .rv.in{opacity:1;transform:none;filter:none}
+@media (prefers-reduced-motion: reduce){.purelane-shop .rv{transition:none;opacity:1;transform:none;filter:none}}
+{% endstyle %}
 
 {% schema %}
 {
   "name": "Shop grid",
+  "tag": "section",
+  "class": "section-shop",
   "settings": [
-    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Bestsellers" },
+    { "type": "text", "id": "kicker", "label": "Kicker text", "default": "Bestsellers" },
     { "type": "text", "id": "heading", "label": "Heading", "default": "Loved by 30,000 homes" },
-    { "type": "collection", "id": "collection", "label": "Collection" },
-    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 4, "max": 12, "step": 1, "default": 8 }
+    { "type": "collection", "id": "collection", "label": "Collection to display" },
+    { "type": "range", "id": "product_limit", "label": "Number of products", "min": 4, "max": 12, "step": 1, "default": 8 }
   ],
-  "presets": [{ "name": "Shop grid" }]
+  "presets": [
+    { "name": "Shop grid" }
+  ]
 }
 {% endschema %}
