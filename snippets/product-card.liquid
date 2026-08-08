@@ -1,0 +1,45 @@
+{%- liquid
+  assign pill_label = ''
+  if product.tags contains 'bestseller'
+    assign pill_label = 'Best seller'
+  elsif product.tags contains 'top-rated'
+    assign pill_label = 'Top rated'
+  elsif product.tags contains 'new'
+    assign pill_label = 'New'
+  endif
+
+  assign rating = product.metafields.custom.rating
+  assign review_count = product.metafields.custom.review_count
+  assign compare_at = product.compare_at_price
+  assign price = product.price
+  assign discount_pct = 0
+  if compare_at > price
+    assign discount_pct = compare_at | minus: price | times: 100 | divided_by: compare_at
+  endif
+-%}
+<article class="glass card rv {{ reveal_class }}{% unless product.available %} card--sold-out{% endunless %}">
+  <a href="{{ product.url }}" class="shot">
+    {%- if pill_label != '' -%}<span class="pill">{{ pill_label }}</span>{%- endif -%}
+    {%- if product.featured_image -%}
+      {{ product.featured_image | image_url: width: 400 | image_tag: loading: 'lazy', widths: '200,300,400,600', alt: product.featured_image.alt | default: product.title, class: 'pimg pimg--photo' }}
+    {%- else -%}
+      <span class="pimg pimg--placeholder">{{ product.title | placeholder_svg_tag: 'placeholder-svg' }}</span>
+    {%- endif -%}
+  </a>
+  <h4 title="{{ product.title | escape }}"><a href="{{ product.url }}">{{ product.title }}</a></h4>
+  {%- if rating != blank and review_count != blank -%}
+    <div class="rate"><b>★ {{ rating }}</b> · {{ review_count }} reviews</div>
+  {%- endif -%}
+  <div class="pr">
+    <strong>{{ price | money }}</strong>
+    {%- if compare_at > price -%}<s>{{ compare_at | money }}</s><em>{{ discount_pct }}% off</em>{%- endif -%}
+  </div>
+  {%- if product.available -%}
+    <form method="post" action="{{ routes.cart_add_url }}">
+      <input type="hidden" name="id" value="{{ product.selected_or_first_available_variant.id }}">
+      <button type="submit" class="btn btn-ghost btn-sm">Add to cart</button>
+    </form>
+  {%- else -%}
+    <button class="btn btn-ghost btn-sm" disabled aria-disabled="true">Sold out</button>
+  {%- endif -%}
+</article>

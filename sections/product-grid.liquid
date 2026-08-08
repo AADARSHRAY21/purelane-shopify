@@ -1,0 +1,38 @@
+<section class="sec" id="shop" data-scene="3">
+  <div class="wrap">
+    <div class="panel-head rv">
+      <span class="kicker">{{ section.settings.kicker }}</span>
+      <h2 class="d2" style="margin-top:12px">{{ section.settings.heading }}</h2>
+      <div class="rule"><i></i>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21c0-6.5 3.5-11 8-12.5C20 15 16.5 20 12 21Z"/><path d="M12 21C12 14.5 8.5 10 4 8.5 4 15 7.5 20 12 21Z"/></svg>
+      <i></i></div>
+    </div>
+    <div class="shelf">
+      {%- for product in section.settings.collection.products limit: section.settings.products_to_show -%}
+        {%- assign s = forloop.index0 | modulo: 4 -%}
+        {%- case s -%}
+          {%- when 1 -%}{%- assign rc = 'rv-d1' -%}
+          {%- when 2 -%}{%- assign rc = 'rv-d2' -%}
+          {%- when 3 -%}{%- assign rc = 'rv-d3' -%}
+          {%- else -%}{%- assign rc = '' -%}
+        {%- endcase -%}
+        {%- render 'product-card', product: product, reveal_class: rc -%}
+      {%- else -%}
+        <p>Add products to this collection to fill this section.</p>
+      {%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Shop grid",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "Bestsellers" },
+    { "type": "text", "id": "heading", "label": "Heading", "default": "Loved by 30,000 homes" },
+    { "type": "collection", "id": "collection", "label": "Collection" },
+    { "type": "range", "id": "products_to_show", "label": "Products to show", "min": 4, "max": 12, "step": 1, "default": 8 }
+  ],
+  "presets": [{ "name": "Shop grid" }]
+}
+{% endschema %}
