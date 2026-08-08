@@ -1,0 +1,13 @@
+{%- if review -%}
+  {%- assign rating = review.rating.value | default: 5 -%}
+  <article class="glass-2 rcard"{% if hidden %} aria-hidden="true"{% endif %}>
+    <div class="st">{%- for i in (1..5) -%}{%- if i <= rating -%}★{%- else -%}☆{%- endif -%}{%- endfor -%}</div>
+    <h5>{{ review.review_title.value }}</h5>
+    <p>{{ review.review_body.value }}</p>
+    <div class="who">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="m5 13 4 4L19 7"/></svg>
+      <b>{{ review.reviewer_name.value }}</b>
+      <span>· {{ review.product_label.value }}</span>
+    </div>
+  </article>
+{%- endif -%}

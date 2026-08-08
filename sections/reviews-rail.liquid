@@ -1,0 +1,39 @@
+<section class="sec revband" id="reviews" data-scene="1">
+  <div class="wrap">
+    <div class="revhead rv">
+      <span class="kicker">{{ section.settings.kicker }}</span>
+      <span class="agg"><span class="st">★★★★★</span> <b>{{ section.settings.aggregate_rating }}</b> from {{ section.settings.aggregate_count }} reviews</span>
+      <span class="agg">Loved by <b>{{ section.settings.homes_count }}</b> homes</span>
+    </div>
+  </div>
+  <div class="revrail rv" aria-label="Customer reviews">
+    <div class="revtrack">
+      {%- for block in section.blocks -%}{%- render 'review-card', review: block.settings.review -%}{%- endfor -%}
+      {%- for block in section.blocks -%}{%- render 'review-card', review: block.settings.review, hidden: true -%}{%- endfor -%}
+    </div>
+  </div>
+</section>
+
+{% schema %}
+{
+  "name": "Reviews rail",
+  "settings": [
+    { "type": "text", "id": "kicker", "label": "Kicker", "default": "That's what they said" },
+    { "type": "text", "id": "aggregate_rating", "label": "Aggregate rating", "default": "4.8" },
+    { "type": "text", "id": "aggregate_count", "label": "Aggregate review count text", "default": "8,000+" },
+    { "type": "text", "id": "homes_count", "label": "Homes count text", "default": "12 lakh+" }
+  ],
+  "blocks": [
+    {
+      "type": "review",
+      "name": "Review",
+      "settings": [
+        { "type": "metaobject", "id": "review", "label": "Review", "metaobject_type": "review" }
+      ]
+    }
+  ],
+  "presets": [
+    { "name": "Reviews rail", "blocks": [{ "type": "review" },{ "type": "review" },{ "type": "review" },{ "type": "review" },{ "type": "review" }] }
+  ]
+}
+{% endschema %}
