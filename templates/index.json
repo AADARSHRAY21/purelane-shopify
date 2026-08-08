@@ -7,7 +7,9 @@
           "type": "heading",
           "settings": {
             "heading": "Browse our latest products",
-            "heading_size": "h0"
+            "heading_size": "h0",
+            "shop_grid": { "type": "product-grid", "settings": {} },
+"reviews_rail": { "type": "reviews-rail", "settings": {} }
           }
         },
         "button": {
@@ -68,8 +70,5 @@
       }
     }
   },
-  "order": [
-    "image_banner",
-    "featured_collection"
-  ]
+  "order": ["image_banner", "shop_grid", "reviews_rail", "featured_collection"]
 }
